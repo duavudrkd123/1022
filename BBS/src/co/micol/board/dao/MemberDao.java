@@ -18,6 +18,8 @@ public class MemberDao extends DAO { // 상위 dao를 상속받아서 사용하�
 	private final String SELECT = "SELECT * FROM MEMBER WHERE ID = ? AND PASSWORD = ?";
 // 한행을 검색하는 쿼리를 만들어주었다. ?는 두개
 	private final String INSERT = "INSERT INTO MEMBER (ID, NAME, PASSWORD, ADDRESS, TEL, ENTERDATE) VALUES(?,?,?,?,?,?)";
+	private final String UPDATE = "UPDATE MEMBER SET PASSWORD = ?, ADDRESS = ?, TEL = ? WHERE ID = ?";
+	private final String DELETE = "DELETE FROM MEMBER WHERE ID = ?";
 
 	public List<MemberVO> selectAll() { // 멤버리스트 전체를 가져오는 메소드,
 		// list는 int, string, date ... 타입을 한꺼번에 다루기 편하다.
@@ -54,7 +56,6 @@ public class MemberDao extends DAO { // 상위 dao를 상속받아서 사용하�
 			psmt.setString(2, vo.getPassword());
 			rs = psmt.executeQuery();
 			if (rs.next()) {
-				loginCheck();
 				vo.setName(rs.getString("name"));
 				vo.setAddress(rs.getString("address"));
 				vo.setTel(rs.getString("tel"));
@@ -72,13 +73,34 @@ public class MemberDao extends DAO { // 상위 dao를 상속받아서 사용하�
 
 	public int update(MemberVO vo) { // 멤버테이블에 업데이트
 		int n = 0;
+		try {
+			psmt = conn.prepareStatement(UPDATE);
+			psmt.setString(1, vo.getPassword());
+			psmt.setString(2, vo.getAddress());
+			psmt.setString(3, vo.getTel());
+			psmt.setString(4, vo.getId());
+			n = psmt.executeUpdate();
 
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			close();
+		}
 		return n;
 	}
 
 	public int delete(MemberVO vo) { // 멤버테이블에 삭제
 		int n = 0;
+		try {
+			psmt = conn.prepareStatement(DELETE);
+			psmt.setNString(1, vo.getId());
+			n = psmt.executeUpdate();
 
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			close();
+		}
 		return n;
 	}
 
@@ -114,7 +136,7 @@ public class MemberDao extends DAO { // 상위 dao를 상속받아서 사용하�
 			e.printStackTrace();
 
 		} finally {
-			close(); //db연결을 끊어준다.
+			close(); // db연결을 끊어준다.
 		}
 	}
 }
